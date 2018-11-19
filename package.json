@@ -1,0 +1,39 @@
+{
+  "name": "react-unpin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "flow": "flow",
+    "test": "jest",
+    "lint": "eslint .",
+    "storybook": "start-storybook -p 9001 -c .storybook"
+  },
+  "author": "Jon Espen Kvisler <jonespen@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.6",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@storybook/react": "^4.0.7",
+    "babel-core": "^7.0.0-0",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^23.6.0",
+    "babel-loader": "^8.0.4",
+    "eslint": "^5.9.0",
+    "eslint-plugin-flowtype": "^3.2.0",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-react-hooks": "^0.0.0",
+    "flow-bin": "^0.86.0",
+    "jest": "^23.6.0",
+    "jest-dom": "^2.1.1",
+    "prettier": "^1.15.2",
+    "react": "^16.7.0-alpha.2",
+    "react-dom": "^16.7.0-alpha.2",
+    "react-testing-library": "^5.2.3"
+  },
+  "prettier": {}
+}
