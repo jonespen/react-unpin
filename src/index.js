@@ -1,11 +1,15 @@
 // @flow
 
 import * as React from "react";
-import { useState } from "react";
 
 type Props = {
+  initialValues?: Array<string>,
   numberOfFields: number,
   maxLength: number,
+  type: "tel" | "text",
+  labelRenderer: (index: number) => string,
+  onEnd?: string => void,
+  errorContainerId: string,
   children: ({
     values: Array<string>,
     fields: Array<{
@@ -13,25 +17,34 @@ type Props = {
         value: string,
         onFocus: () => void,
         onChange: (event: SyntheticInputEvent<>) => void,
-        maxLength: "1"
+        maxLength: string
       }
     }>
   }) => React.Node
 };
 
-export default function Unpin({ numberOfFields, maxLength, children }: Props) {
-  // https://github.com/facebook/react/issues/14072#issuecomment-436843834
+export default function Unpin({
+  initialValues,
+  numberOfFields,
+  maxLength,
+  type,
+  labelRenderer,
+  errorContainerId,
+  children,
+  onEnd
+}: Props) {
   const refs = React.useMemo(
     () => Array.from({ length: numberOfFields }, () => React.createRef()),
     [numberOfFields]
   );
 
-  const valuesArray = Array.from({ length: numberOfFields }, () => "");
-  const [values, setValues] = useState(valuesArray);
+  const valuesArray =
+    initialValues || Array.from({ length: numberOfFields }, () => "");
+  const [values, setValues] = React.useState(valuesArray);
 
   function goToNextField(index) {
     const nextIndex = Math.min(index + 1, numberOfFields - 1);
-    if (index < numberOfFields) {
+    if (index < numberOfFields && refs[nextIndex].current) {
       refs[nextIndex].current.focus();
     }
   }
@@ -42,12 +55,38 @@ export default function Unpin({ numberOfFields, maxLength, children }: Props) {
       return {
         fieldProps: {
           value,
+          type,
           maxLength: `${maxLength}`,
           onKeyDown: event => {
+            const prevRef = refs[index - 1];
+            const nextRef = refs[index + 1];
+
             // backspace, go to previous
-            if (event.which === 8 && index > 0 && refs[index - 1]) {
+            if (event.which === 8) {
+              const newValues = [...values];
+              newValues[index] = "";
+              setValues(newValues);
+
+              if (index > 0 && prevRef && prevRef.current) {
+                event.preventDefault();
+                prevRef.current.focus();
+              }
+            }
+
+            // arrow right, go to next
+            if (event.which === 39) {
               event.preventDefault();
-              refs[index - 1].current.focus();
+              if (nextRef && nextRef.current) {
+                nextRef.current.focus();
+              }
+            }
+
+            // arrow left, go to prev
+            if (event.which === 37) {
+              event.preventDefault();
+              if (prevRef && prevRef.current) {
+                prevRef.current.focus();
+              }
             }
           },
           onKeyPress: event => {
@@ -67,6 +106,10 @@ export default function Unpin({ numberOfFields, maxLength, children }: Props) {
             const newValues = [...values];
             newValues[index] = value;
             setValues(newValues);
+
+            if (onEnd && index + 1 === newValues.length) {
+              onEnd(newValues.join(""));
+            }
           },
           onFocus: () => {
             if (refs[index] && refs[index].current) {
@@ -74,7 +117,13 @@ export default function Unpin({ numberOfFields, maxLength, children }: Props) {
             }
           },
           ref: refs[index],
-          autoFocus: index === 0
+          autoFocus: index === 0,
+          autoCorrect: "off",
+          autoComplete: "off",
+          autoCapitalize: "off",
+          spellCheck: false,
+          "aria-label": labelRenderer(index + 1),
+          "aria-describedby": errorContainerId
         }
       };
     })
@@ -83,5 +132,7 @@ export default function Unpin({ numberOfFields, maxLength, children }: Props) {
 
 Unpin.defaultProps = {
   numberOfFields: 4,
-  maxLength: 1
+  maxLength: 1,
+  type: "tel",
+  labelRenderer: index => `Please enter the verification code digit ${index}`
 };
